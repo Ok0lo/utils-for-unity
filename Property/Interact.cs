@@ -15,8 +15,6 @@ public class Interact : MonoBehaviour {
 
     [Header("Debug")] 
     [SerializeField] private bool showDebug = false;
-    [SerializeField] private Color activeColor = Color.green;
-    [SerializeField] private Color inactiveColor = Color.red;
     
 
     private void Awake() {
@@ -49,18 +47,12 @@ public class Interact : MonoBehaviour {
         if (other.gameObject.TryGetComponent(out Player player) == false) return;
 
         player.OnPlayerPressedInteractButton += OnPlayerInteract;
-
-        if (showDebug == true)
-            Gizmos.color = activeColor;
     }
     
     private void OnTriggerExit(Collider other) {
         if (other.gameObject.TryGetComponent(out Player player) == false) return;
 
         player.OnPlayerPressedInteractButton -= OnPlayerInteract;
-        
-        if (showDebug == true)
-            Gizmos.color = inactiveColor;
     }
 
 

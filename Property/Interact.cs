@@ -9,17 +9,39 @@ public class Interact : MonoBehaviour {
 
 
     [Header("Settings")] 
-    [SerializeField] private float observeRadius;
+    [SerializeField] private float observeRadius = 3f;
+
     private SphereCollider _observeSphereCollider;
+
+    [Header("Debug")] 
+    [SerializeField] private bool showDebug = false;
+    [SerializeField] private Color activeColor = Color.green;
+    [SerializeField] private Color inactiveColor = Color.red;
     
 
     private void Awake() {
         _observeSphereCollider = ColliderCreator.CreateSphereCollider(gameObject, true, observeRadius);
+        
+        if (showDebug == true) 
+            Gizmos.color = inactiveColor;
     }
 
 
+    public void Remove() {
+        UnsubscribeAll();
+        Destroy(this);
+    }
+    
+    
     private void OnPlayerInteract(Player player) {
+        if (IsClosestInteractToPlayer(player) == false) return; 
+        
         OnInteractedByPlayer?.Invoke(player);
+        
+        if (showDebug == true) {
+            Debug.Log(gameObject.name + "." + this.name + 
+                      ": " + player.name + " interacts");            
+        }
     }
     
     
@@ -27,23 +49,51 @@ public class Interact : MonoBehaviour {
         if (other.gameObject.TryGetComponent(out Player player) == false) return;
 
         player.OnPlayerPressedInteractButton += OnPlayerInteract;
+
+        if (showDebug == true)
+            Gizmos.color = activeColor;
     }
     
     private void OnTriggerExit(Collider other) {
         if (other.gameObject.TryGetComponent(out Player player) == false) return;
 
         player.OnPlayerPressedInteractButton -= OnPlayerInteract;
+        
+        if (showDebug == true)
+            Gizmos.color = inactiveColor;
     }
+
+
+    private void UnsubscribeAll() {
+        if (OnInteractedByPlayer != null) {
+            foreach (var d in OnInteractedByPlayer.GetInvocationList())
+                OnInteractedByPlayer -= (d as Action<Player>);
+        }
+    }
+    
     
     private bool IsClosestInteractToPlayer(Player player) { 
         List<Vector3> interactObjectList = new List<Vector3>();
         
-        Collider[] colliderArray = (Collider[]) Physics.OverlapSphere(player.transform.position, observeRadius).Except(new[] { _observeSphereCollider } );
+        Collider[] colliderArray = Physics.OverlapSphere(player.transform.position, observeRadius);
         
-        foreach (Collider candidate in colliderArray)
-            if (candidate.gameObject.TryGetComponent(out Interact interact)) interactObjectList.Add(candidate.transform.position);
+        foreach (Collider candidate in colliderArray) {
+            if (candidate == _observeSphereCollider) continue;
+
+            if (candidate.gameObject.TryGetComponent(out Interact interact))
+                interactObjectList.Add(candidate.transform.position);
+        }
 
         return Dotting.IsClosestPointTo(interactObjectList, transform.position, player.transform.position);
     }
+
+
+    private void OnDrawGizmos() {
+        if (showDebug == false) return;
+        
+        Gizmos.DrawWireSphere(transform.position, observeRadius);
+    }
+    
+    
     
 }

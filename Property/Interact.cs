@@ -37,8 +37,7 @@ public class Interact : MonoBehaviour {
         OnInteractedByPlayer?.Invoke(player);
         
         if (showDebug == true) {
-            Debug.Log(gameObject.name + "." + this.name + 
-                      ": " + player.name + " interacts");            
+            Debug.Log(gameObject.name + ": " + player.name + " interacts");            
         }
     }
     

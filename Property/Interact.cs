@@ -10,8 +10,7 @@ public class Interact : MonoBehaviour {
 
     [Header("Settings")] 
     [SerializeField] private float observeRadius = 3f;
-
-    private List<Player> _subscribeToPlayerList = new List<Player>();
+    private List<Player> _subscribeToPlayerList;
     private SphereCollider _observeSphereCollider;
 
     [Header("Debug")] 
@@ -19,6 +18,7 @@ public class Interact : MonoBehaviour {
 
 
     private void Awake() {
+        _subscribeToPlayerList = new List<Player>();
         _observeSphereCollider = ColliderCreator.CreateSphereCollider(gameObject, true, observeRadius);
     }
 
